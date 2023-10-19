@@ -1146,8 +1146,6 @@ class basic_json
         result["platform"] = "win32";
 #elif defined __linux__
         result["platform"] = "linux";
-#elif defined __APPLE__
-        result["platform"] = "apple";
 #elif defined __unix__
         result["platform"] = "unix";
 #else
@@ -5150,38 +5148,6 @@ class basic_json
         }
     }
 
-    /// @}
-
-
-    ///////////////
-    // modifiers //
-    ///////////////
-
-    /// @name modifiers
-    /// @{
-
-    /*!
-    @brief clears the contents
-
-    Clears the content of a JSON value and resets it to the default value as
-    if @ref basic_json(value_t) would have been called:
-
-    Value type  | initial value
-    ----------- | -------------
-    null        | `null`
-    boolean     | `false`
-    string      | `""`
-    number      | `0`
-    object      | `{}`
-    array       | `[]`
-
-    @complexity Linear in the size of the JSON value.
-
-    @liveexample{The example below shows the effect of `clear()` to different
-    JSON types.,clear}
-
-    @since version 1.0.0
-    */
     void clear() noexcept
     {
         switch (m_type)
@@ -6488,29 +6454,6 @@ class basic_json
         return parse(std::begin(c), std::end(c), cb);
     }
 
-    /*!
-    @brief deserialize from stream
-
-    Deserializes an input stream to a JSON value.
-
-    @param[in,out] i  input stream to read a serialized JSON value from
-    @param[in,out] j  JSON value to write the deserialized input to
-
-    @throw std::invalid_argument in case of parse errors
-
-    @complexity Linear in the length of the input. The parser is a predictive
-    LL(1) parser.
-
-    @note A UTF-8 byte order mark is silently ignored.
-
-    @liveexample{The example below shows how a JSON value is constructed by
-    reading a serialization from a stream.,operator_deserialize}
-
-    @sa parse(std::istream&, const parser_callback_t) for a variant with a
-    parser callback function to filter values while parsing
-
-    @since version 1.0.0
-    */
     friend std::istream& operator<<(basic_json& j, std::istream& i)
     {
         j = parser(i).parse();
@@ -8127,19 +8070,6 @@ class basic_json
         });
     }
 
-    /*!
-    @brief escape a string
-
-    Escape a string by replacing certain special characters by a sequence of
-    an escape character (backslash) and another character and other control
-    characters by a sequence of "\u" followed by a four-digit hex
-    representation.
-
-    @param[in] s  the string to escape
-    @return  the escaped string
-
-    @complexity Linear in the length of string @a s.
-    */
     static string_t escape_string(const string_t& s)
     {
         const auto space = extra_space(s);
@@ -8394,24 +8324,6 @@ class basic_json
         }
     };
 
-
-    /*!
-    @brief internal implementation of the serialization function
-
-    This function is called by the public member function dump and organizes
-    the serialization internally. The indentation level is propagated as
-    additional parameter. In case of arrays and objects, the function is
-    called recursively. Note that
-
-    - strings and object keys are escaped using `escape_string()`
-    - integer numbers are converted implicitly via `operator<<`
-    - floating-point numbers are converted to a string using `"%g"` format
-
-    @param[out] o              stream to write to
-    @param[in] pretty_print    whether the output shall be pretty-printed
-    @param[in] indent_step     the indent level
-    @param[in] current_indent  the current indent level (only used internally)
-    */
     void dump(std::ostream& o,
               const bool pretty_print,
               const unsigned int indent_step,
@@ -9431,23 +9343,6 @@ class basic_json
         internal_iterator m_it = internal_iterator();
     };
 
-    /*!
-    @brief a template for a reverse iterator class
-
-    @tparam Base the base iterator type to reverse. Valid types are @ref
-    iterator (to create @ref reverse_iterator) and @ref const_iterator (to
-    create @ref const_reverse_iterator).
-
-    @requirement The class satisfies the following concept requirements:
-    - [RandomAccessIterator](http://en.cppreference.com/w/cpp/concept/RandomAccessIterator):
-      The iterator that can be moved to point (forward and backward) to any
-      element in constant time.
-    - [OutputIterator](http://en.cppreference.com/w/cpp/concept/OutputIterator):
-      It is possible to write to the pointed-to element (only if @a Base is
-      @ref iterator).
-
-    @since version 1.0.0
-    */
     template<typename Base>
     class json_reverse_iterator : public std::reverse_iterator<Base>
     {
@@ -9748,28 +9643,6 @@ class basic_json
                 }
             }
         }
-
-        /*!
-        This function implements a scanner for JSON. It is specified using
-        regular expressions that try to follow RFC 7159 as close as possible.
-        These regular expressions are then translated into a minimized
-        deterministic finite automaton (DFA) by the tool
-        [re2c](http://re2c.org). As a result, the translated code for this
-        function consists of a large block of code with `goto` jumps.
-
-        @return the class of the next token read from the buffer
-
-        @complexity Linear in the length of the input.\n
-
-        Proposition: The loop below will always terminate for finite input.\n
-
-        Proof (by contradiction): Assume a finite input. To loop forever, the
-        loop must never hit code with a `break` statement. The only code
-        snippets without a `break` statement are the continue statements for
-        whitespace and byte-order-marks. To loop forever, the input must be an
-        infinite sequence of whitespace or byte-order-marks. This contradicts
-        the assumption of finite input, q.e.d.
-        */
         token_type scan()
         {
             while (true)
@@ -10872,9 +10745,6 @@ basic_json_parser_74:
             // no stream is used or end of file is reached
             if (m_stream == nullptr or m_stream->eof())
             {
-                // m_start may or may not be pointing into m_line_buffer at
-                // this point. We trust the standard library to do the right
-                // thing. See http://stackoverflow.com/q/28142011/266378
                 m_line_buffer.assign(m_start, m_limit);
 
                 // append n characters to make sure that there is sufficient
@@ -10914,64 +10784,6 @@ basic_json_parser_74:
             return string_t(reinterpret_cast<typename string_t::const_pointer>(m_start),
                             static_cast<size_t>(m_cursor - m_start));
         }
-
-        /*!
-        @brief return string value for string tokens
-
-        The function iterates the characters between the opening and closing
-        quotes of the string value. The complete string is the range
-        [m_start,m_cursor). Consequently, we iterate from m_start+1 to
-        m_cursor-1.
-
-        We differentiate two cases:
-
-        1. Escaped characters. In this case, a new character is constructed
-           according to the nature of the escape. Some escapes create new
-           characters (e.g., `"\\n"` is replaced by `"\n"`), some are copied
-           as is (e.g., `"\\\\"`). Furthermore, Unicode escapes of the shape
-           `"\\uxxxx"` need special care. In this case, to_unicode takes care
-           of the construction of the values.
-        2. Unescaped characters are copied as is.
-
-        @pre `m_cursor - m_start >= 2`, meaning the length of the last token
-        is at least 2 bytes which is trivially true for any string (which
-        consists of at least two quotes).
-
-            " c1 c2 c3 ... "
-            ^                ^
-            m_start          m_cursor
-
-        @complexity Linear in the length of the string.\n
-
-        Lemma: The loop body will always terminate.\n
-
-        Proof (by contradiction): Assume the loop body does not terminate. As
-        the loop body does not contain another loop, one of the called
-        functions must never return. The called functions are `std::strtoul`
-        and to_unicode. Neither function can loop forever, so the loop body
-        will never loop forever which contradicts the assumption that the loop
-        body does not terminate, q.e.d.\n
-
-        Lemma: The loop condition for the for loop is eventually false.\n
-
-        Proof (by contradiction): Assume the loop does not terminate. Due to
-        the above lemma, this can only be due to a tautological loop
-        condition; that is, the loop condition i < m_cursor - 1 must always be
-        true. Let x be the change of i for any loop iteration. Then
-        m_start + 1 + x < m_cursor - 1 must hold to loop indefinitely. This
-        can be rephrased to m_cursor - m_start - 2 > x. With the
-        precondition, we x <= 0, meaning that the loop condition holds
-        indefinitely if i is always decreased. However, observe that the value
-        of i is strictly increasing with each iteration, as it is incremented
-        by 1 in the iteration expression and never decremented inside the loop
-        body. Hence, the loop condition will eventually be false which
-        contradicts the assumption that the loop condition is a tautology,
-        q.e.d.
-
-        @return string value of current token without opening and closing
-        quotes
-        @throw std::out_of_range if to_unicode fails
-        */
         string_t get_string() const
         {
             assert(m_cursor - m_start >= 2);
@@ -12286,105 +12098,21 @@ basic_json_parser_74:
         return ptr.get_unchecked(this);
     }
 
-    /*!
-    @brief access specified element via JSON Pointer
-
-    Uses a JSON pointer to retrieve a reference to the respective JSON value.
-    No bound checking is performed. The function does not change the JSON
-    value; no `null` values are created. In particular, the the special value
-    `-` yields an exception.
-
-    @param[in] ptr  JSON pointer to the desired element
-
-    @return const reference to the element pointed to by @a ptr
-
-    @complexity Constant.
-
-    @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
-
-    @liveexample{The behavior is shown in the example.,operatorjson_pointer_const}
-
-    @since version 2.0.0
-    */
     const_reference operator[](const json_pointer& ptr) const
     {
         return ptr.get_unchecked(this);
     }
 
-    /*!
-    @brief access specified element via JSON Pointer
-
-    Returns a reference to the element at with specified JSON pointer @a ptr,
-    with bounds checking.
-
-    @param[in] ptr  JSON pointer to the desired element
-
-    @return reference to the element pointed to by @a ptr
-
-    @complexity Constant.
-
-    @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
-
-    @liveexample{The behavior is shown in the example.,at_json_pointer}
-
-    @since version 2.0.0
-    */
     reference at(const json_pointer& ptr)
     {
         return ptr.get_checked(this);
     }
 
-    /*!
-    @brief access specified element via JSON Pointer
-
-    Returns a const reference to the element at with specified JSON pointer @a
-    ptr, with bounds checking.
-
-    @param[in] ptr  JSON pointer to the desired element
-
-    @return reference to the element pointed to by @a ptr
-
-    @complexity Constant.
-
-    @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
-
-    @liveexample{The behavior is shown in the example.,at_json_pointer_const}
-
-    @since version 2.0.0
-    */
     const_reference at(const json_pointer& ptr) const
     {
         return ptr.get_checked(this);
     }
 
-    /*!
-    @brief return flattened JSON value
-
-    The function creates a JSON object whose keys are JSON pointers (see [RFC
-    6901](https://tools.ietf.org/html/rfc6901)) and whose values are all
-    primitive. The original JSON value can be restored using the @ref
-    unflatten() function.
-
-    @return an object that maps JSON pointers to primitive values
-
-    @note Empty objects and arrays are flattened to `null` and will not be
-          reconstructed correctly by the @ref unflatten() function.
-
-    @complexity Linear in the size the JSON value.
-
-    @liveexample{The following code shows how a JSON object is flattened to an
-    object whose keys consist of JSON pointers.,flatten}
-
-    @sa @ref unflatten() for the reverse function
-
-    @since version 2.0.0
-    */
     basic_json flatten() const
     {
         basic_json result(value_t::object);
@@ -12392,83 +12120,11 @@ basic_json_parser_74:
         return result;
     }
 
-    /*!
-    @brief unflatten a previously flattened JSON value
-
-    The function restores the arbitrary nesting of a JSON value that has been
-    flattened before using the @ref flatten() function. The JSON value must
-    meet certain constraints:
-    1. The value must be an object.
-    2. The keys must be JSON pointers (see
-       [RFC 6901](https://tools.ietf.org/html/rfc6901))
-    3. The mapped values must be primitive JSON types.
-
-    @return the original JSON from a flattened version
-
-    @note Empty objects and arrays are flattened by @ref flatten() to `null`
-          values and can not unflattened to their original type. Apart from
-          this example, for a JSON value `j`, the following is always true:
-          `j == j.flatten().unflatten()`.
-
-    @complexity Linear in the size the JSON value.
-
-    @liveexample{The following code shows how a flattened JSON object is
-    unflattened into the original nested JSON object.,unflatten}
-
-    @sa @ref flatten() for the reverse function
-
-    @since version 2.0.0
-    */
     basic_json unflatten() const
     {
         return json_pointer::unflatten(*this);
     }
 
-    /// @}
-
-    //////////////////////////
-    // JSON Patch functions //
-    //////////////////////////
-
-    /// @name JSON Patch functions
-    /// @{
-
-    /*!
-    @brief applies a JSON patch
-
-    [JSON Patch](http://jsonpatch.com) defines a JSON document structure for
-    expressing a sequence of operations to apply to a JSON) document. With
-    this function, a JSON Patch is applied to the current JSON value by
-    executing all operations from the patch.
-
-    @param[in] json_patch  JSON patch document
-    @return patched document
-
-    @note The application of a patch is atomic: Either all operations succeed
-          and the patched document is returned or an exception is thrown. In
-          any case, the original value is not changed: the patch is applied
-          to a copy of the value.
-
-    @throw std::out_of_range if a JSON pointer inside the patch could not
-    be resolved successfully in the current JSON value; example: `"key baz
-    not found"`
-    @throw invalid_argument if the JSON patch is malformed (e.g., mandatory
-    attributes are missing); example: `"operation add must have member path"`
-
-    @complexity Linear in the size of the JSON value and the length of the
-    JSON patch. As usually only a fraction of the JSON value is affected by
-    the patch, the complexity can usually be neglected.
-
-    @liveexample{The following code shows how a JSON patch is applied to a
-    value.,patch}
-
-    @sa @ref diff -- create a JSON patch by comparing two JSON values
-
-    @sa [RFC 6902 (JSON Patch)](https://tools.ietf.org/html/rfc6902)
-    @sa [RFC 6901 (JSON Pointer)](https://tools.ietf.org/html/rfc6901)
-
-    @since version 2.0.0
-    */
     basic_json patch(const basic_json& json_patch) const
     {
         // make a working copy to apply the patch to
@@ -12897,34 +12553,11 @@ basic_json_parser_74:
     /// @}
 };
 
-/////////////
-// presets //
-/////////////
-
-/*!
-@brief default JSON class
-
-This type is the default specialization of the @ref basic_json class which
-uses the standard template types.
-
-@since version 1.0.0
-*/
 using json = basic_json<>;
 } // namespace nlohmann
 
-
-///////////////////////
-// nonmember support //
-///////////////////////
-
-// specialization of std::swap, and std::hash
 namespace std
 {
-/*!
-@brief exchanges the values of two JSON objects
-
-@since version 1.0.0
-*/
 template<>
 inline void swap(nlohmann::json& j1,
                  nlohmann::json& j2) noexcept(
@@ -12953,37 +12586,11 @@ struct hash<nlohmann::json>
 };
 } // namespace std
 
-/*!
-@brief user-defined string literal for JSON values
-
-This operator implements a user-defined string literal for JSON objects. It
-can be used by adding `"_json"` to a string literal and returns a JSON object
-if no parse error occurred.
-
-@param[in] s  a string representation of a JSON object
-@param[in] n  the length of string @a s
-@return a JSON object
-
-@since version 1.0.0
-*/
 inline nlohmann::json operator "" _json(const char* s, std::size_t n)
 {
     return nlohmann::json::parse(s, s + n);
 }
 
-/*!
-@brief user-defined string literal for JSON pointer
-
-This operator implements a user-defined string literal for JSON Pointers. It
-can be used by adding `"_json_pointer"` to a string literal and returns a JSON pointer
-object if no parse error occurred.
-
-@param[in] s  a string representation of a JSON Pointer
-@param[in] n  the length of string @a s
-@return a JSON pointer object
-
-@since version 2.0.0
-*/
 inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std::size_t n)
 {
     return nlohmann::json::json_pointer(std::string(s, n));
