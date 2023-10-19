@@ -46,7 +46,7 @@ int main(int argc, const char** argv) {
 		printf("Invalid target id: %u\n", target_id);
 		return 1;
 	}
-	for (int i = 2; i < argc; i++) {
+	for (int i = 2; i < argc; ++i) {
 		cmd += (std::string(argv[i]) + " ");
 	}
 

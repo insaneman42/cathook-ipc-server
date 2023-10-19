@@ -60,17 +60,6 @@ void print_status() {
 	peer().pool->statistics(info);
 	printf("memory: ");
 	TEXT_NORMAL; printf("%.1f%% free\n", float(info.free) / float(info.free + info.alloc) * 100); TEXT_BOLD;
-	/*printf("command memory pool stats: ");
-	CatMemoryPool::pool_info_s info;
-	peer().pool->statistics(info);
-	ESC_CUP(4, 8); ESC_EL(2);  printf("total:     ");
-	ESC_CUP(4, 9); ESC_EL(2);  printf("free:      ");
-	ESC_CUP(4, 10); ESC_EL(2); printf("allocated: ");
-	TEXT_NORMAL;
-	ESC_CUP(16, 8);  printf("%lu (%u blocks)", info.free + info.alloc, info.blkcnt);
-	ESC_CUP(16, 9); printf("%lu (%u blocks)", info.free, info.freeblk);
-	ESC_CUP(16, 10); printf("%lu (%u blocks)", info.alloc, info.allocblk);
-	*/
 	int ypos = 8;
 	ESC_CUP(2, ypos);
 	printf("%-2s %-5s %-9s %-21s %s\n", "ID", "PID", "SteamID", "Server IP", "Name");
@@ -78,7 +67,7 @@ void print_status() {
 	ypos += 3;
 	TEXT_NORMAL;
 	// Zeroth peer is the server.
-	for (unsigned i = 0; i < cat_ipc::max_peers; i++) {
+	for (unsigned i = 0; i < cat_ipc::max_peers; ++i) {
 		if (!peer().memory->peer_data[i].free) {
 			ESC_CUP(2, ypos);
 			const auto& data = peer().memory->peer_user_data[i];
@@ -106,7 +95,7 @@ int main(int argc, char** argv) {
 	peer().Connect();
 	peer().memory->global_data.magic_number = 0x0DEADCA7;
 	bool silent = false;
-	for (int i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; ++i) {
 		if (!strcmp(argv[i], "-s")) {
 			silent = true;
 		}
