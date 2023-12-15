@@ -8177,7 +8177,6 @@ class basic_json
         return result;
     }
 
-
     /*!
     @brief locale-independent serialization for built-in arithmetic types
     */

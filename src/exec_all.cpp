@@ -1,10 +1,3 @@
-/*
- * exec_all.cpp
- *
- *  Created on: Jul 29, 2017
- *      Author: nullifiedcat
- */
-
 #include "ipcb.hpp"
 #include "cathookipc.hpp"
 
