@@ -2,6 +2,7 @@
  * cathookipc.hpp
  *
  *  Created on: Mar 19, 2017
+ *      Author: nullifiedcat
  */
 
 #ifndef CATHOOKIPC_HPP_

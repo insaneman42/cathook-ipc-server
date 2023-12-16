@@ -1,3 +1,10 @@
+/*
+ * console.cpp
+ *
+ *  Created on: Aug 12, 2017
+ *      Author: nullifiedcat
+ */
+
 #include <iostream>
 #include <functional>
 #include <unordered_map>
