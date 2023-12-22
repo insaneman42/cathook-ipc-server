@@ -62,7 +62,6 @@ json query_peer(unsigned id) {
 	result["name"] = std::string(udata.name);
 	result["friendid"] = udata.friendid;
 	result["connected"] = udata.connected;
-	result["heartbeat"] = udata.heartbeat;
 	result["ts_injected"] = udata.ts_injected;
 	result["ts_connected"] = udata.ts_connected;
 	result["ts_disconnected"] = udata.ts_disconnected;
@@ -111,9 +110,6 @@ json exec(const json& args) {
 	if (not has_key(args, "target")) {
 		throw std::runtime_error("undefined pid");
 	}
-	if (not has_key(args, "cmd")) {
-		throw std::runtime_error("undefined command");
-	}
 	unsigned uid = args["target"].get<unsigned>();
 	if (uid < 0 || uid > cat_ipc::max_peers) {
 		throw std::out_of_range("peer out of range");
@@ -134,9 +130,6 @@ json exec(const json& args) {
 json exec_all(const json& args) {
 	if (not peer or not peer->connected) {
 		throw std::runtime_error("not connected to ipc server");
-	}
-	if (not has_key(args, "cmd")) {
-		throw std::runtime_error("undefined command");
 	}
 	std::string cmd = args["cmd"];
 	ReplaceString(cmd, " && ", " ; ");
@@ -165,7 +158,7 @@ json query(const json& args) {
 			result[i.get<std::string>()] = query_peer(uid);
 		}
 	} else {
-		for (unsigned i = 0; i < cat_ipc::max_peers; i++) {
+		for (unsigned i = 0; i < cat_ipc::max_peers; ++i) {
 			if (skipEmpty and peer->IsPeerDead(i)) {
 				continue;
 			}
@@ -193,9 +186,6 @@ json kill(const json& args) {
 	}
 	if (not peer or not peer->connected) {
 		throw std::runtime_error("not connected to ipc server");
-	}
-	if (not has_key(args, "pid")) {
-		throw std::runtime_error("undefined pid");
 	}
 	pid_t uid = args["pid"].get<pid_t>();
 	if (uid < 0 || uid > cat_ipc::max_peers) {
