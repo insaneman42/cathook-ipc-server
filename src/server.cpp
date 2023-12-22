@@ -63,7 +63,7 @@ void print_status() {
 	int ypos = 8;
 	ESC_CUP(2, ypos);
 	printf("%-2s %-5s %-9s %-21s %s\n", "ID", "PID", "SteamID", "Server IP", "Name");
-	printf("    %-5s %-9s %-4s   %-5s   %-5s  %-9s %s", "State", "Class", "Team", "Score", "Total", "Health", "Heartbeat");
+	printf("    %-5s %-9s %-4s   %-5s   %-5s  %-9s %s", "State", "Class", "Team", "Score", "Total", "Health");
 	ypos += 3;
 	TEXT_NORMAL;
 	// Zeroth peer is the server.
@@ -78,10 +78,10 @@ void print_status() {
 						good_class(data.ingame.role) ? classes[data.ingame.role].c_str() : classes[0].c_str(),
 						good_team(data.ingame.team) ? teams[data.ingame.team].c_str() : teams[0].c_str(),
 						data.ingame.score, data.accumulated.score, data.ingame.health, data.ingame.health_max,
-						time(nullptr) - data.heartbeat);
+						time(nullptr));
 			} else {
 				printf("    %-5s %-9s %-4s   %-5s   %-5d   %-9s %u\n",
-						"N/A", "N/A", "N/A", "N/A", data.accumulated.score, "N/A", time(nullptr) - data.heartbeat);
+						"N/A", "N/A", "N/A", "N/A", data.accumulated.score, "N/A", time(nullptr));
 			}
 			ypos += 2;
 		}
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 	printf("cathook IPC server\n");
 	while (true) {
 		tick++;
-		if (!(tick % 10)) { // Sweep/Process once every 10 seconds
+		if (!(tick % 20)) { // Sweep/Process once every 20 seconds
 			peer().SweepDead();
 			peer().ProcessCommands();
 		}
