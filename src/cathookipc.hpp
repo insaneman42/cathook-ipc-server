@@ -22,6 +22,8 @@ struct user_data_s
 
     bool connected;
 
+    time_t heartbeat;
+
     time_t ts_injected;
     time_t ts_connected;
     time_t ts_disconnected;
