@@ -165,7 +165,7 @@ json query(const json& args) {
 			result[i.get<std::string>()] = query_peer(uid);
 		}
 	} else {
-		for (unsigned i = 0; i < cat_ipc::max_peers; i++) {
+		for (unsigned i = 0; i < cat_ipc::max_peers; ++i) {
 			if (skipEmpty and peer->IsPeerDead(i)) {
 				continue;
 			}
