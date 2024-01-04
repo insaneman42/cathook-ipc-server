@@ -69,7 +69,6 @@ json query_peer(unsigned id) {
 
 	result["accumulated"] = json{};
 	result["accumulated"]["kills"] = udata.accumulated.kills;
-	result["accumulated"]["deaths"] = udata.accumulated.deaths;
 	result["accumulated"]["score"] = udata.accumulated.score;
 	result["accumulated"]["shots"] = udata.accumulated.shots;
 	result["accumulated"]["hits"] = udata.accumulated.hits;
@@ -78,7 +77,6 @@ json query_peer(unsigned id) {
 	result["ingame"] = json{};
 	result["ingame"]["good"] = udata.ingame.good;
 	result["ingame"]["kills"] = udata.ingame.kills;
-	result["ingame"]["deaths"] = udata.ingame.deaths;
 	result["ingame"]["score"] = udata.ingame.score;
 	result["ingame"]["shots"] = udata.ingame.shots;
 	result["ingame"]["hits"] = udata.ingame.hits;
