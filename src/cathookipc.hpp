@@ -31,9 +31,7 @@ struct user_data_s
     struct accumulated_t
 	{
     	int kills;		// TODO
-    	int deaths;		// TODO
     	int score;
-
     	int shots;
     	int hits;
     	int headshots;
@@ -44,7 +42,6 @@ struct user_data_s
 	    bool good;
 
     	int kills;		// TODO
-    	int deaths;		// TODO
     	int score;
 
     	int shots;		// TODO

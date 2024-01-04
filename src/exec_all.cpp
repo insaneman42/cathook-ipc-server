@@ -24,7 +24,7 @@ int main(int argc, const char** argv) {
 	std::string cmd = "";
 	if (argc < 1) return 1;
 
-	for (int i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; ++i) {
 		cmd += (std::string(argv[i]) + " ");
 	}
 
