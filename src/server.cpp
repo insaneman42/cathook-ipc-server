@@ -80,7 +80,7 @@ void print_status() {
 						data.ingame.score, data.accumulated.score, data.ingame.health, data.ingame.health_max,
 						time(nullptr) - data.heartbeat);
 			} else {
-				printf("    %-5s %-9s %-4s   %-5s   %-5d   %-9s %u\n",
+				printf("%-5s %-9s %-4s   %-5s   %-5d   %-9s %u\n",
 					"N/A", "N/A", "N/A", "N/A", data.accumulated.score, "N/A", time(nullptr) - data.heartbeat);
 			}
 			ypos += 2;
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 	printf("cathook IPC server\n");
 	while (true) {
 		tick++;
-		if (!(tick % 30)) { // Sweep/Process once every 30 seconds
+		if (!(tick % 5)) { // Sweep/Process once every 5 seconds cuz fuck you
 			peer().SweepDead();
 			peer().ProcessCommands();
 		}
