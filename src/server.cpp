@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 	printf("cathook IPC server\n");
 	while (true) {
 		tick++;
-		if (!(tick % 50)) { // Sweep/Process once every 50 seconds cuz fuck you
+		if (!(tick % 20)) { // Sweep/Process once every 20 seconds cuz fuck you
 			peer().SweepDead();
 			peer().ProcessCommands();
 		}
