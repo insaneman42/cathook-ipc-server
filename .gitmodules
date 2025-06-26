@@ -1,6 +1,3 @@
 [submodule "simple-ipc"]
 	path = simple-ipc
 	url = https://github.com/insaneman42/simple-ipc
-[submodule "cathook-ipc-server"]
-	path = cathook-ipc-server
-	url = https://github.com/insaneman42/cathook-ipc-server.git
